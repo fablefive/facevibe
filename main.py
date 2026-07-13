@@ -1,9 +1,14 @@
 """Gwansang Yangban(관상가양반) MCP Server.
 
 Korean physiognomy (face reading) tools backed by the live Gwansang Yangban
-service. Follows the same Render-friendly pattern as lolgpt-mcp:
-- stdio transport locally, Streamable HTTP (stateless, JSON) when PORT is set
-- /health route for keep-alive pings
+service. Reuses the live Kakao-chatbot backend endpoints:
+- /ait/analyze-url (preferred) or /ait/upload-group — photo submission
+- /ait/group-status — analysis polling / full report
+- /category — per-category fortunes (love, investment, wealth, ...) exactly
+  as served to the Kakao chatbot, persona voice included
+
+Transport: stdio locally, Streamable HTTP (stateless, JSON) when PORT is set.
+/health and / routes answer keep-alive / platform health checks.
 """
 
 import base64
@@ -31,6 +36,10 @@ API_URL = os.getenv("FACEVIBE_API_URL", "https://slotdle.gabia.io").rstrip("/")
 # PlayMCP requires avg 100ms / p99 3,000ms — keep upstream calls short and
 # fail with a friendly retry message instead of hanging.
 REQUEST_TIMEOUT = 2.5
+# Photo submission may need to relay the image itself (download + multipart
+# upload), so it gets a larger, still-bounded budget.
+SUBMIT_TIMEOUT = 8
+MAX_IMAGE_BYTES = 12 * 1024 * 1024
 
 PORT = int(os.getenv("PORT", "8000"))
 
@@ -55,9 +64,6 @@ with open(os.path.join(DATA_DIR, "face_dex.json"), encoding="utf-8") as f:
 
 _dex_cache = {"ts": 0.0, "data": _BUNDLED_DEX}
 _DEX_TTL = 3600  # the live server's static/face_dex.json is the single source
-
-_rank_cache = {}
-_RANK_TTL = 60
 
 
 def _get_dex():
@@ -102,6 +108,14 @@ CATEGORY_KO = {
     "exam_timing": "시험시기", "luck_fortune": "복권운", "achievement": "성취운",
 }
 
+# Categories served by the live Kakao-chatbot /category endpoint
+LIVE_CATEGORIES = {
+    "love", "money", "job", "health", "ideal_type", "marriage_timing",
+    "relationship_advice", "investment", "wealth_period", "career_path",
+    "promotion", "change_job", "longevity", "health_advice", "exam_timing",
+    "luck_fortune", "achievement",
+}
+
 LABEL_KO = {
     "Attractive": "매력적인 인상", "Young": "동안", "Smiling": "웃상",
     "Chubby": "통통한 얼굴", "Oval_Face": "계란형 얼굴", "High_Cheekbones": "높은 광대",
@@ -110,12 +124,6 @@ LABEL_KO = {
     "Bushy_Eyebrows": "숯검댕이 눈썹", "Pale_Skin": "하얀 피부", "Rosy_Cheeks": "빨간 볼",
     "Bangs": "앞머리", "No_Beard": "깔끔", "Male": "테토", "Female": "에겐",
     "Bags_Under_Eyes": "다크서클", "Mouth_Slightly_Open": "헤벌레", "Blurry": "두부상",
-}
-
-RANK_CATEGORIES = {
-    "young": "🐣 동안 랭킹", "teto": "🦁 테토 랭킹", "egen": "🌸 에겐 랭킹",
-    "attractive": "😎 매력 랭킹", "smile": "😊 웃상 랭킹", "tofu": "🧸 두부상 랭킹",
-    "puppy": "🐶 강아지상 랭킹", "cat": "🐱 고양이상 랭킹", "arab": "👳 아랍상 랭킹",
 }
 
 FACE_TYPES_MD = """## The 5 Face Types of Gwansang Yangban(관상가양반)
@@ -147,20 +155,23 @@ FACE_TYPES_MD = """## The 5 Face Types of Gwansang Yangban(관상가양반)
 """
 
 
-# ── reading_id helpers (stateless: uid + request_id packed in one token) ────
+# ── reading_id helpers (stateless: uid + request_id + mode in one token) ────
 
-def _encode_reading_id(uid: str, request_id: str) -> str:
-    raw = f"{uid}:{request_id}".encode("utf-8")
+def _encode_reading_id(uid: str, request_id: str, mode: str) -> str:
+    raw = f"{uid}:{request_id}:{mode}".encode("utf-8")
     return base64.urlsafe_b64encode(raw).decode("ascii").rstrip("=")
 
 
 def _decode_reading_id(reading_id: str):
     padded = reading_id + "=" * (-len(reading_id) % 4)
     raw = base64.urlsafe_b64decode(padded.encode("ascii")).decode("utf-8")
-    uid, _, request_id = raw.partition(":")
+    parts = raw.split(":")
+    if len(parts) == 2:  # tokens issued before the mode flag existed
+        parts.append("g")
+    uid, request_id, mode = parts[0], parts[1], parts[2]
     if not uid or not request_id:
         raise ValueError("malformed reading_id")
-    return uid, request_id
+    return uid, request_id, ("p" if mode == "p" else "g")
 
 
 # ── health check (keep-alive target · PlayMCP in KC 헬스체크 대응) ──────────
@@ -176,70 +187,169 @@ async def root(request: Request) -> JSONResponse:
     return JSONResponse({"status": "ok", "service": "gwansang-yangban-mcp", "mcp": "/mcp"})
 
 
-# ── tool 1: submit a face reading ────────────────────────────────────────────
+# ── photo submission (shared by personal / group tools) ─────────────────────
 
-@mcp.tool(
-    annotations=ToolAnnotations(
-        title="Submit Face Reading",
-        readOnlyHint=False,
-        destructiveHint=False,
-        idempotentHint=False,
-        openWorldHint=True,
-    )
-)
-async def submit_face_reading(image_url: str) -> str:
-    """Submits a photo for AI face reading (Korean physiognomy) at Gwansang Yangban(관상가양반).
+_EXT_BY_CONTENT_TYPE = {
+    "image/jpeg": "jpg", "image/jpg": "jpg", "image/png": "png",
+    "image/heic": "heic", "image/heif": "heif",
+}
 
-    The photo is queued for asynchronous analysis (face detection, 40 facial
-    attributes, face-type classification). Returns a `reading_id` immediately;
-    analysis takes about 15-30 seconds. Call `get_face_reading_result` with
-    the returned `reading_id` after waiting. In a group photo, the face with
-    the best physiognomy is automatically marked.
 
-    Args:
-        image_url: Publicly accessible URL of a photo (jpg/png) that clearly
-            shows one or more human faces.
+def _submit_photo(image_url: str, mode: str) -> str:
+    """Queue a photo for analysis on the live backend; returns markdown.
 
-    Returns:
-        Markdown with the `reading_id` and polling instructions.
+    Fast path: POST /ait/analyze-url (URL pass-through, no image relay).
+    Fallback (current live deployment): download the image here and relay it
+    as multipart to POST /ait/upload-group — both feed the same worker queue.
     """
     url = (image_url or "").strip()
     if not url.lower().startswith(("http://", "https://")):
         return "Error: `image_url` must be a public http(s) URL of a photo."
 
     uid = "mcp_" + uuid.uuid4().hex[:20]
+    request_id = None
+
+    # 1) fast path — available once the live app ships /ait/analyze-url
     try:
         r = requests.post(
             f"{API_URL}/ait/analyze-url",
             json={"image_url": url, "walletAddress": uid},
             timeout=REQUEST_TIMEOUT,
+            allow_redirects=False,  # gabia turns unknown routes into a 302 → 404 page
         )
-        if r.status_code != 200:
-            return f"Error: analysis service returned status {r.status_code}. Please try again."
-        try:
+        if r.status_code == 200:
             data = r.json()
-        except ValueError:
-            return "Error: analysis service returned an unexpected response. Please try again later."
-        if data.get("error"):
-            return f"Error: {data['error']}"
-        request_id = data.get("request_id")
-        if not request_id:
-            return "Error: analysis service did not return a request id. Please try again."
-    except requests.exceptions.Timeout:
-        return "Error: the analysis service timed out. Please try again."
-    except requests.exceptions.RequestException as e:
-        return f"Error: failed to reach the analysis service - {e}"
+            if data.get("error"):
+                return f"Error: {data['error']}"
+            request_id = data.get("request_id")
+    except (requests.exceptions.RequestException, ValueError):
+        request_id = None
 
-    reading_id = _encode_reading_id(uid, request_id)
+    # 2) fallback — relay the image bytes to the live /ait/upload-group
+    if not request_id:
+        try:
+            img = requests.get(
+                url, timeout=(3, 5), stream=True,
+                headers={"User-Agent": "Mozilla/5.0 (GwansangYangbanMCP)"},
+            )
+            if img.status_code != 200:
+                return (
+                    f"Error: could not download the photo (HTTP {img.status_code}). "
+                    "Make sure `image_url` is a publicly accessible image link."
+                )
+            ctype = (img.headers.get("Content-Type") or "").split(";")[0].strip().lower()
+            ext = _EXT_BY_CONTENT_TYPE.get(ctype)
+            if not ext:
+                tail = url.split("?")[0].rsplit(".", 1)
+                ext = tail[-1].lower() if len(tail) == 2 else ""
+                if ext not in ("jpg", "jpeg", "png", "heic", "heif"):
+                    return (
+                        "Error: the URL does not point to a supported image "
+                        "(jpg/png/heic). Use a direct photo link."
+                    )
+            content = b""
+            for chunk in img.iter_content(chunk_size=65536):
+                content += chunk
+                if len(content) > MAX_IMAGE_BYTES:
+                    return "Error: the photo is larger than 12MB. Use a smaller image."
+            if not content:
+                return "Error: the photo could not be downloaded. Use a different link."
+        except requests.exceptions.RequestException as e:
+            return f"Error: failed to download the photo - {e}"
+
+        try:
+            r = requests.post(
+                f"{API_URL}/ait/upload-group",
+                files={"file": (f"photo.{ext}", content)},
+                data={"walletAddress": uid},
+                timeout=SUBMIT_TIMEOUT,
+            )
+            if r.status_code != 200:
+                return f"Error: analysis service returned status {r.status_code}. Please try again."
+            data = r.json()
+            if data.get("error"):
+                return f"Error: {data['error']}"
+            request_id = data.get("request_id")
+        except requests.exceptions.Timeout:
+            return "Error: the analysis service timed out. Please try again."
+        except (requests.exceptions.RequestException, ValueError) as e:
+            return f"Error: failed to reach the analysis service - {e}"
+
+    if not request_id:
+        return "Error: analysis service did not return a request id. Please try again."
+
+    reading_id = _encode_reading_id(uid, request_id, mode)
+    kind = "Personal" if mode == "p" else "Group"
     return (
-        "## Face reading submitted 🔮\n\n"
+        f"## {kind} face reading submitted 🔮\n\n"
         f"- **reading_id:** `{reading_id}`\n"
         "- Analysis takes about **15–30 seconds**.\n\n"
-        f"Wait, then call `get_face_reading_result` with this reading_id."
+        "Wait, then call `get_face_reading_result` with this reading_id."
     )
 
 
-# ── tool 2: poll the result ──────────────────────────────────────────────────
+# ── tool 1: personal photo ───────────────────────────────────────────────────
+
+@mcp.tool(
+    annotations=ToolAnnotations(
+        title="Read Personal Face Photo",
+        readOnlyHint=False,
+        destructiveHint=False,
+        idempotentHint=False,
+        openWorldHint=True,
+    )
+)
+async def read_personal_face_photo(image_url: str) -> str:
+    """Submits a personal (single-person) photo for AI face reading at Gwansang Yangban(관상가양반).
+
+    Korean physiognomy analysis of one face: 40 facial attributes, one of 5
+    classical face types, and persona-voiced fortunes. Analysis runs
+    asynchronously (~15-30s); this returns a `reading_id` immediately. Call
+    `get_face_reading_result` with it after waiting, then category tools
+    (`get_love_fortune`, `get_investment_fortune`, `get_wealth_fortune`,
+    `get_more_fortunes`) for deeper readings.
+
+    Args:
+        image_url: Publicly accessible URL of a photo (jpg/png) that clearly
+            shows one human face.
+
+    Returns:
+        Markdown with the `reading_id` and polling instructions.
+    """
+    return _submit_photo(image_url, "p")
+
+
+# ── tool 2: group photo ──────────────────────────────────────────────────────
+
+@mcp.tool(
+    annotations=ToolAnnotations(
+        title="Read Group Face Photo",
+        readOnlyHint=False,
+        destructiveHint=False,
+        idempotentHint=False,
+        openWorldHint=True,
+    )
+)
+async def read_group_face_photo(image_url: str) -> str:
+    """Submits a group photo for AI face reading at Gwansang Yangban(관상가양반).
+
+    The signature feature: among everyone in the photo, the face with the best
+    physiognomy is picked and marked directly on the image, and that person's
+    face reading is returned. Analysis runs asynchronously (~15-30s); this
+    returns a `reading_id` immediately. Call `get_face_reading_result` with it
+    after waiting.
+
+    Args:
+        image_url: Publicly accessible URL of a photo (jpg/png) showing two or
+            more human faces.
+
+    Returns:
+        Markdown with the `reading_id` and polling instructions.
+    """
+    return _submit_photo(image_url, "g")
+
+
+# ── tool 3: poll the result ──────────────────────────────────────────────────
 
 @mcp.tool(
     annotations=ToolAnnotations(
@@ -254,22 +364,23 @@ async def get_face_reading_result(reading_id: str) -> str:
     """Fetches the result of a face reading submitted to Gwansang Yangban(관상가양반).
 
     If analysis is still running, it says so — wait ~10 seconds and call again.
-    When done, returns the classified face type (one of 5 classical Korean
-    physiognomy types), detected facial attributes, and fortune readings
-    (wealth, love, career, health...) told in the voice of a randomly assigned
-    master persona. For group photos, includes a link to the image with the
-    best face marked.
+    When done, returns the classified face type, detected facial attributes,
+    and fortune readings told in a master persona's voice. For group photos,
+    includes a link to the image with the best face marked. Follow up with
+    `get_love_fortune` / `get_investment_fortune` / `get_wealth_fortune` /
+    `get_more_fortunes` using the same reading_id.
 
     Args:
-        reading_id: The id returned by `submit_face_reading`.
+        reading_id: The id returned by `read_personal_face_photo` or
+            `read_group_face_photo`.
 
     Returns:
         Markdown face reading report, or a processing/status notice.
     """
     try:
-        uid, request_id = _decode_reading_id((reading_id or "").strip())
+        uid, request_id, mode = _decode_reading_id((reading_id or "").strip())
     except Exception:
-        return "Error: invalid `reading_id`. Use the exact value returned by `submit_face_reading`."
+        return "Error: invalid `reading_id`. Use the exact value returned by the submit tool."
 
     try:
         r = requests.get(
@@ -301,6 +412,8 @@ async def get_face_reading_result(reading_id: str) -> str:
         return "⏳ Analysis in progress. Try again in about 10 seconds."
 
     lines = ["## 관상 리포트 — Gwansang Yangban(관상가양반) 🔮\n"]
+    if mode == "g":
+        lines.append("_단체사진에서 관상이 가장 좋은 얼굴을 골라 풀이했다._\n")
 
     face_type = data.get("face_type")
     if face_type:
@@ -324,7 +437,8 @@ async def get_face_reading_result(reading_id: str) -> str:
 
     image_url = data.get("image_url")
     if image_url:
-        lines.append(f"- **베스트 얼굴 마킹 사진:** {image_url}")
+        label = "베스트 관상 얼굴 마킹 사진" if mode == "g" else "관상 포인트 마킹 사진"
+        lines.append(f"- **{label}:** {image_url}")
 
     intro = data.get("intro")
     if intro:
@@ -335,10 +449,181 @@ async def get_face_reading_result(reading_id: str) -> str:
         teller = f" _(by {f_['style_name']})_" if f_.get("style_name") else ""
         lines.append(f"\n### {name}{teller}\n{f_.get('text', '')}")
 
+    lines.append(
+        "\n---\n더 보기: 같은 reading_id로 `get_love_fortune`(애정운), "
+        "`get_investment_fortune`(투자운), `get_wealth_fortune`(재물운), "
+        "`get_more_fortunes`(직업운·건강운·복권운 등)를 호출할 수 있다."
+    )
     return "\n".join(lines)
 
 
-# ── tool 3: celebrity face reading dex ───────────────────────────────────────
+# ── category fortunes via the live Kakao-chatbot /category endpoint ─────────
+
+def _fetch_category_fortune(reading_id: str, category: str) -> str:
+    """Calls the live /category endpoint (same one the Kakao chatbot uses)."""
+    try:
+        uid, _, _ = _decode_reading_id((reading_id or "").strip())
+    except Exception:
+        return "Error: invalid `reading_id`. Use the exact value returned by the submit tool."
+
+    payload = {"userRequest": {"user": {"id": uid, "properties": {"botUserKey": uid}}}}
+    try:
+        r = requests.post(
+            f"{API_URL}/category",
+            json=payload,
+            headers={"category": category},
+            timeout=REQUEST_TIMEOUT,
+        )
+        if r.status_code != 200:
+            return f"Error: fortune service returned status {r.status_code}. Please try again."
+        data = r.json()
+    except requests.exceptions.Timeout:
+        return "Error: the fortune service timed out. Please try again."
+    except (requests.exceptions.RequestException, ValueError) as e:
+        return f"Error: failed to reach the fortune service - {e}"
+
+    texts = [
+        o["simpleText"]["text"]
+        for o in (data.get("template", {}).get("outputs", []) or [])
+        if isinstance(o, dict) and o.get("simpleText", {}).get("text")
+    ]
+    if not texts:
+        return "Error: the fortune service returned an unexpected response. Please try again later."
+
+    text = texts[0].replace("{{#mentions.user}}", "").strip()
+    if "최근 분석을 토대로" not in text:
+        # The backend has no completed analysis for this uid yet.
+        return (
+            "⏳ No completed face reading found for this reading_id yet. "
+            "Make sure `get_face_reading_result` returns the report first "
+            "(analysis takes ~15-30s), then call this tool again."
+        )
+    cat_ko = CATEGORY_KO.get(category, category)
+    return f"## {cat_ko} — Gwansang Yangban(관상가양반)\n\n{text}"
+
+
+# ── tool 4: love fortune (애정운) ─────────────────────────────────────────────
+
+@mcp.tool(
+    annotations=ToolAnnotations(
+        title="Love Fortune",
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=True,
+    )
+)
+async def get_love_fortune(reading_id: str) -> str:
+    """Tells the love fortune (애정운) from a completed face reading at Gwansang Yangban(관상가양반).
+
+    Reads romance and relationship luck from the analyzed facial features,
+    delivered by the love-specialist master persona — the same reading the
+    live Kakao chatbot serves. Requires a finished analysis: run
+    `read_personal_face_photo` or `read_group_face_photo` first and confirm
+    the report via `get_face_reading_result`.
+
+    Args:
+        reading_id: The id returned by the photo submit tools.
+
+    Returns:
+        Markdown love fortune in the specialist persona's voice.
+    """
+    return _fetch_category_fortune(reading_id, "love")
+
+
+# ── tool 5: investment fortune (투자운) ──────────────────────────────────────
+
+@mcp.tool(
+    annotations=ToolAnnotations(
+        title="Investment Fortune",
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=True,
+    )
+)
+async def get_investment_fortune(reading_id: str) -> str:
+    """Tells the investment fortune (투자운) from a completed face reading at Gwansang Yangban(관상가양반).
+
+    Reads investment instincts and timing from the analyzed facial features,
+    in a master persona's voice — the same reading the live Kakao chatbot
+    serves. For entertainment only, not financial advice. Requires a finished
+    analysis from the photo submit tools.
+
+    Args:
+        reading_id: The id returned by the photo submit tools.
+
+    Returns:
+        Markdown investment fortune in a persona's voice.
+    """
+    return _fetch_category_fortune(reading_id, "investment")
+
+
+# ── tool 6: wealth fortune (재물운) ──────────────────────────────────────────
+
+@mcp.tool(
+    annotations=ToolAnnotations(
+        title="Wealth Fortune",
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=True,
+    )
+)
+async def get_wealth_fortune(reading_id: str) -> str:
+    """Tells the wealth fortune (재물운) from a completed face reading at Gwansang Yangban(관상가양반).
+
+    Reads money luck — how fortune gathers and stays — from the analyzed
+    facial features, delivered by the wealth-specialist master persona, same
+    as the live Kakao chatbot. For entertainment only. Requires a finished
+    analysis from the photo submit tools.
+
+    Args:
+        reading_id: The id returned by the photo submit tools.
+
+    Returns:
+        Markdown wealth fortune in the specialist persona's voice.
+    """
+    return _fetch_category_fortune(reading_id, "money")
+
+
+# ── tool 7: all other fortune categories ─────────────────────────────────────
+
+@mcp.tool(
+    annotations=ToolAnnotations(
+        title="More Fortune Categories",
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=True,
+    )
+)
+async def get_more_fortunes(reading_id: str, category: str) -> str:
+    """Tells any other fortune category from a completed face reading at Gwansang Yangban(관상가양반).
+
+    Beyond love/investment/wealth, the live service reads 14 more categories
+    from the same analyzed face. Requires a finished analysis from the photo
+    submit tools.
+
+    Args:
+        reading_id: The id returned by the photo submit tools.
+        category: One of: job (직업운), health (건강운), ideal_type (이상형),
+            marriage_timing (결혼운), relationship_advice (연애조언),
+            wealth_period (재복시기), career_path (적성운), promotion (승진운),
+            change_job (이직운), longevity (장수운), health_advice (건강조언),
+            exam_timing (시험운), luck_fortune (복권운), achievement (성취운).
+            love/investment/money also work (same as the dedicated tools).
+
+    Returns:
+        Markdown fortune for the chosen category in a persona's voice.
+    """
+    cat = (category or "").strip().lower()
+    if cat not in LIVE_CATEGORIES:
+        return "Error: unknown category. Use one of: " + ", ".join(sorted(LIVE_CATEGORIES))
+    return _fetch_category_fortune(reading_id, cat)
+
+
+# ── tool 8: celebrity face reading dex ───────────────────────────────────────
 
 @mcp.tool(
     annotations=ToolAnnotations(
@@ -405,70 +690,7 @@ async def get_celebrity_face_readings(name: str = "") -> str:
     return "\n".join(lines)
 
 
-# ── tool 4: global rankings ──────────────────────────────────────────────────
-
-@mcp.tool(
-    annotations=ToolAnnotations(
-        title="Face Reading Rankings",
-        readOnlyHint=True,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
-    )
-)
-async def get_face_reading_rankings(category: str = "young") -> str:
-    """Shows live global face-attribute rankings from Gwansang Yangban(관상가양반).
-
-    Every analyzed user is scored per facial attribute; this returns the
-    anonymized TOP 10 leaderboard and total participant count for a category.
-
-    Args:
-        category: One of: young (baby face), teto (masculine vibe),
-            egen (feminine vibe), attractive, smile, tofu (soft tofu face),
-            puppy (puppy look), cat (cat look), arab (bold features).
-
-    Returns:
-        Markdown TOP 10 leaderboard with scores (0-100).
-    """
-    cat = (category or "young").strip().lower()
-    if cat not in RANK_CATEGORIES:
-        return "Error: unknown category. Use one of: " + ", ".join(RANK_CATEGORIES)
-
-    now = time.time()
-    cached = _rank_cache.get(cat)
-    if cached and now - cached[0] < _RANK_TTL:
-        data = cached[1]
-    else:
-        try:
-            r = requests.get(
-                f"{API_URL}/ait/rank", params={"type": cat}, timeout=REQUEST_TIMEOUT
-            )
-            if r.status_code != 200:
-                return f"Error: ranking service returned status {r.status_code}. Please try again."
-            try:
-                data = r.json()
-            except ValueError:
-                return "Error: ranking service returned an unexpected response. Please try again later."
-            if data.get("error"):
-                return f"Error: {data['error']}"
-            _rank_cache[cat] = (now, data)
-        except requests.exceptions.Timeout:
-            return "Error: the ranking service timed out. Please try again."
-        except requests.exceptions.RequestException as e:
-            return f"Error: failed to reach the ranking service - {e}"
-
-    lines = [
-        f"## {data.get('title', RANK_CATEGORIES[cat])}",
-        f"참여자 {data.get('total', 0):,}명 · Gwansang Yangban(관상가양반)\n",
-    ]
-    for row in (data.get("top") or [])[:10]:
-        lines.append(f"{row.get('rank')}. {row.get('name')} — {row.get('score')}점")
-    if not data.get("top"):
-        lines.append("No participants yet.")
-    return "\n".join(lines)
-
-
-# ── tool 5: the five face types ──────────────────────────────────────────────
+# ── tool 9: the five face types ──────────────────────────────────────────────
 
 @mcp.tool(
     annotations=ToolAnnotations(
@@ -494,7 +716,7 @@ async def get_face_types() -> str:
     return FACE_TYPES_MD
 
 
-# ── tool 6: fortune text by face type ────────────────────────────────────────
+# ── tool 10: fortune text by face type (no photo needed) ────────────────────
 
 @mcp.tool(
     annotations=ToolAnnotations(
@@ -508,10 +730,11 @@ async def get_face_types() -> str:
 async def get_fortune_by_face_type(face_type: str, category: str = "money", style: str = "") -> str:
     """Tells a fortune for a given face type in a master persona's voice, from Gwansang Yangban(관상가양반).
 
-    Pick one of the 5 face types (see `get_face_types`) and a fortune category;
-    the reading is delivered in the voice of one of 8 master personas. If
-    `style` is omitted, the specialist rule applies (health → 백강혁, love →
-    오은영, wealth/achievement → 진양철, others → a fixed free persona).
+    No photo needed. Pick one of the 5 face types (see `get_face_types`) and a
+    fortune category; the reading is delivered in the voice of one of 8 master
+    personas. If `style` is omitted, the specialist rule applies (health →
+    백강혁, love → 오은영, wealth/achievement → 진양철, others → a fixed free
+    persona).
 
     Args:
         face_type: One of: 금구몰니형, 오룡쟁주형, 봉학좌수면형, 와우형, 노서하전형.
