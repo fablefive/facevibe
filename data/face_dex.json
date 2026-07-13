@@ -1,0 +1,527 @@
+{
+  "version": 3,
+  "updated": "2026-07-11",
+  "note": "이미지는 모두 위키미디어 공용(Wikimedia Commons)의 퍼블릭 도메인 자료. image_credit 참고.",
+  "people": [
+    {
+      "id": "hong-myungbo",
+      "name": "홍명보",
+      "title": "쓰러져도 정면을 보는 리베로의 상",
+      "job": "축구인 · 전 국가대표팀 감독",
+      "era": "1969–",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Korea%20Special%20Olympics%20HongMyungbo%2003.jpg?width=900",
+      "image_credit": "Wikimedia Commons, CC BY-SA 2.0 (Republic of Korea / Flickr)",
+      "emoji": "⚽",
+      "face_type": "와우형",
+      "face_type_confident": true,
+      "style": "bkh",
+      "style_name": "백강혁",
+      "overall_score": 84,
+      "score_comment": "노력하면 트이는 상이지",
+      "attributes": [
+        {
+          "label": "Bushy_Eyebrows",
+          "probability": 0.85
+        },
+        {
+          "label": "Narrow_Eyes",
+          "probability": 0.78
+        },
+        {
+          "label": "High_Cheekbones",
+          "probability": 0.72
+        },
+        {
+          "label": "Oval_Face",
+          "probability": 0.66
+        },
+        {
+          "label": "No_Beard",
+          "probability": 0.7
+        },
+        {
+          "label": "Male",
+          "probability": 0.98
+        }
+      ],
+      "intro": "결론부터. 이 상, 무너지지 않습니다. 짙은 눈썹과 굳은 턱 — 뒤에서 전체를 읽는 리베로의 상이야. 2002년 그 여름, 제일 뒤에서 제일 멀리 보던 눈이지. 2026년 여름은 아팠을 거야. 두 번째 사퇴, 청문회까지. 근데 차트를 다시 봐. 이 상은 도망치는 상이 아니라 '있는 그대로 얘기하겠다'며 정면에 서는 상이야. 진단 끝.",
+      "fortunes": [
+        {
+          "key": "job",
+          "score": 82,
+          "text": "직업운. 선수로는 아시아 최고의 수비수, 지도자로는 두 번의 큰 좌절 — 극과 극을 다 가진 차트야. 처방은 하나. 이 상의 진짜 자리는 화려한 전면이 아니라 뒤에서 판을 정리하는 자리야. 리베로가 괜히 리베로가 아니지."
+        },
+        {
+          "key": "success",
+          "score": 80,
+          "text": "성공운 봅니다. 이 상의 성공 곡선은 직선이 아니라 파도야. 4강 신화의 꼭대기와 조별리그 탈락의 바닥을 오가는. 중요한 건 바닥에서의 자세인데 — 회피 안 하고 청문회장에 서겠다는 그 자세, 그게 다음 파도의 시작점입니다."
+        },
+        {
+          "key": "relationship_advice",
+          "score": 78,
+          "text": "관계 조언. 무뚝뚝한 눈매 때문에 오해를 자주 사는 상이야. 속은 제자들 밥부터 챙기는 사람인데 표현이 늦어. 여론이라는 건 실력만큼 설명도 필요합니다. 침묵 처방은 이제 중단하고, 말하세요. 그게 이 상의 살길이야."
+        },
+        {
+          "key": "health_advice",
+          "score": 74,
+          "text": "건강 조언. 스트레스를 안으로 삼키는 상이야. 겉은 강철 수비수인데 속은 이미 연장전이지. 비난을 혼자 다 받아내는 버릇, 그거 몸에 제일 나쁩니다. 이상. 다음 환자."
+        }
+      ]
+    },
+    {
+      "id": "chung-yongjin",
+      "name": "정용진",
+      "title": "곳간을 다시 띄우려는 승부사의 상",
+      "job": "신세계그룹 회장",
+      "era": "1968–",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/%EC%A0%95%EC%9A%A9%EC%A7%84-%EC%8B%A0%EC%84%B8%EA%B3%84%EA%B7%B8%EB%A3%B9-%EB%B6%80%ED%9A%8C%EC%9E%A5%20Chung%20Yong-jin.jpg?width=900",
+      "image_credit": "Wikimedia Commons, CC BY 4.0 (SSG BLOG)",
+      "emoji": "🛒",
+      "face_type": "금구몰니형",
+      "face_type_confident": true,
+      "style": "jyc",
+      "style_name": "진양철",
+      "overall_score": 89,
+      "score_comment": "길운이 가득한 상이네",
+      "attributes": [
+        {
+          "label": "Chubby",
+          "probability": 0.8
+        },
+        {
+          "label": "Big_Nose",
+          "probability": 0.75
+        },
+        {
+          "label": "Smiling",
+          "probability": 0.72
+        },
+        {
+          "label": "Big_Lips",
+          "probability": 0.65
+        },
+        {
+          "label": "Oval_Face",
+          "probability": 0.6
+        },
+        {
+          "label": "Male",
+          "probability": 0.98
+        }
+      ],
+      "intro": "고개 들어봐라. 허어 — 회장이 회장 관상을 보게 될 줄이야. 두툼한 코에 여유 있는 볼, 곳간이 어디 있는지 냄새로 아는 금구몰니형이라. 재밌는 기, 이 상은 곳간을 지키는 데 안 만족하고 자꾸 새 판을 벌린데이. '2026년은 다시 날아오를 시간'이라 캤다며? 야구단에 테마파크에, 이제는 AI 곳간까지 짓겠다 카고. 이런 오지랖은… 내 스타일이데이.",
+      "fortunes": [
+        {
+          "key": "money",
+          "score": 90,
+          "text": "재물운 보자. 물려받은 곳간에 안주하는 상이 아이라, 곳간 자체를 새로 설계하는 상이데이. 미국서 AI 회사랑 손잡고 데이터센터를 짓겠다 카는 거 봐라. 유통쟁이가 데이터를 곳간으로 보는 눈 — 그기 이 상의 재물 그릇인 기라."
+        },
+        {
+          "key": "investment",
+          "score": 86,
+          "text": "투자운이데이. 청라에 야구장 딸린 초대형 스타필드라… 남들이 '무모하다' 카는 판에 먼저 들어가는 눈이라. 이런 투자는 절반은 배짱이고 절반은 인내데이. 삽 뜨는 것보다 완공까지 버티는 기 진짜 승부인 거 명심해라."
+        },
+        {
+          "key": "relationship_advice",
+          "score": 84,
+          "text": "사람 관계 보자. 입이 큰 상은 말로 흥하고 말로 곤욕도 치르는 법이라. SNS로 고객이랑 직접 수다 떠는 회장이 세상에 몇이나 되노. 그 붙임성이 재산인데 — 말은 자산이자 부채인 거, 장부에 꼭 적어놔라."
+        },
+        {
+          "key": "success",
+          "score": 87,
+          "text": "성공운이데이. 이 상은 순풍보다 역풍에서 오기가 발동하는 상이라. 실적 갖고 말 많던 시절 다 견디고 '다시 성장'을 외치는 거 봐라. 금거북이는 원래 늦게 떠도 가라앉지는 않는 기라. 내 지켜보꾸마."
+        }
+      ]
+    },
+    {
+      "id": "an-junggeun",
+      "name": "안중근",
+      "title": "동양 평화를 꿈꾼 단호한 상",
+      "job": "독립운동가 · 대한의군 참모중장",
+      "era": "1879–1910",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/An%20Jung-geun.JPG?width=900",
+      "image_credit": "Wikimedia Commons, Public Domain",
+      "emoji": "🕊️",
+      "face_type": "오룡쟁주형",
+      "face_type_confident": true,
+      "style": "ksj",
+      "style_name": "그알톤",
+      "overall_score": 96,
+      "score_comment": "하늘이 내린 상이로다",
+      "attributes": [
+        {
+          "label": "Bushy_Eyebrows",
+          "probability": 0.92
+        },
+        {
+          "label": "Narrow_Eyes",
+          "probability": 0.85
+        },
+        {
+          "label": "High_Cheekbones",
+          "probability": 0.82
+        },
+        {
+          "label": "Pointy_Nose",
+          "probability": 0.75
+        },
+        {
+          "label": "No_Beard",
+          "probability": 0.62
+        },
+        {
+          "label": "Male",
+          "probability": 0.98
+        }
+      ],
+      "intro": "이 얼굴의 기록을 추적해 보겠습니다. 짙은 눈썹은 신념을, 좁고 깊은 눈은 흔들리지 않는 결심을 말해 줍니다. 다섯 용이 구슬을 다투는 오룡쟁주형 — 난세에 태어나 난세를 정면으로 마주하는 상입니다. 그런데 말입니다. 이 상의 핵심은 강함이 아니라, 강함의 방향이 늘 '나'가 아닌 '모두'를 향해 있었다는 점입니다.",
+      "fortunes": [
+        {
+          "key": "success",
+          "score": 97,
+          "text": "성공운을 살펴보겠습니다. 이 상의 성공은 자리나 재물이 아니라 이름으로 옵니다. 살아서 얻는 영광보다 남긴 뜻이 더 오래 빛나는, 역사에 기록되는 유형입니다."
+        },
+        {
+          "key": "job",
+          "score": 94,
+          "text": "직업운입니다. 눈썹의 기세와 광대의 힘이 지휘관의 상을 이룹니다. 조직을 이끌고 결단을 내리는 자리에서 진가가 드러나며, 붓을 들어도 힘이 실리는 손입니다. 옥중에서 남긴 글씨가 그 증거입니다."
+        },
+        {
+          "key": "relationship_advice",
+          "score": 90,
+          "text": "인간관계 대목입니다. 이 상은 사람을 쉽게 사귀지 않으나, 한번 뜻을 같이한 동지는 목숨처럼 지킵니다. 손가락을 끊어 맹세를 새길 만큼, 약속의 무게가 남다른 상입니다."
+        },
+        {
+          "key": "health_advice",
+          "score": 72,
+          "text": "건강 조언입니다. 신념이 강한 상은 몸을 뒷전에 두기 쉽습니다. 스스로를 소모하며 목표를 향하는 유형이니, 부디 기억하시기 바랍니다 — 뜻을 오래 펼치려면 몸이 먼저입니다."
+        }
+      ]
+    },
+    {
+      "id": "kim-gu",
+      "name": "김구",
+      "title": "문화의 힘을 믿은 큰 그릇의 상",
+      "job": "독립운동가 · 대한민국 임시정부 주석",
+      "era": "1876–1949",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Kim%20Gu%20in%201949.jpg?width=900",
+      "image_credit": "Wikimedia Commons, Public Domain",
+      "emoji": "🖋️",
+      "face_type": "와우형",
+      "face_type_confident": true,
+      "style": "jyc",
+      "style_name": "진양철",
+      "overall_score": 95,
+      "score_comment": "하늘이 내린 상이로다",
+      "attributes": [
+        {
+          "label": "Chubby",
+          "probability": 0.88
+        },
+        {
+          "label": "Big_Nose",
+          "probability": 0.8
+        },
+        {
+          "label": "Big_Lips",
+          "probability": 0.72
+        },
+        {
+          "label": "Bushy_Eyebrows",
+          "probability": 0.7
+        },
+        {
+          "label": "Bags_Under_Eyes",
+          "probability": 0.65
+        },
+        {
+          "label": "Male",
+          "probability": 0.98
+        }
+      ],
+      "intro": "고개 들어봐라. …허어, 이기 무신 상이고. 소가 엎드려 되새김질하는 와우형이라. 겉보기엔 순하고 둔해 보여도, 이런 상이 제일 무서운 기라. 안 서두르고, 안 꺾이고, 끝까지 가거든. 내 평생 사람을 봤지만서도, 이만한 뚝심 담을 그릇은 몇 못 봤데이.",
+      "fortunes": [
+        {
+          "key": "job",
+          "score": 96,
+          "text": "직업운 보자. 이 상은 잔재주로 크는 상이 아이다. 큰 짐을 지고 오래 걷는 상인 기라. 남들이 다 내려놓을 때 혼자 지고 가는 어깨 — 조직의 어른 자리가 예정된 얼굴이데이."
+        },
+        {
+          "key": "achievement",
+          "score": 95,
+          "text": "성취운이데이. 두툼한 코와 입술에 신용이 앉아 있데이. 이 상의 성취는 빨리 안 오는 대신, 오면 크고 오래 남는다. 총칼보다 문화의 힘이라 캤제? 그기 바로 이 상의 답인 기라."
+        },
+        {
+          "key": "love",
+          "score": 86,
+          "text": "정 얘기를 하자. 무뚝뚝해 보여도 속정은 바다인 상이라. 제 식구, 제 사람이라 여기면 끝까지 품는 눈이데이. 다만 정이 깊은 만큼 이별의 상처도 깊게 남는 상이니, 마음 간수 잘해라."
+        },
+        {
+          "key": "longevity",
+          "score": 78,
+          "text": "수명 대목이데이. 몸은 황소같이 튼튼한 상인데, 큰일을 짊어진 사람은 제 명을 다 못 쓰는 수가 있다. 짐을 나눠 질 사람을 곁에 두는 것 — 그기 이 상의 장수 비결인 기라."
+        }
+      ]
+    },
+    {
+      "id": "ryu-gwansun",
+      "name": "유관순",
+      "title": "열여덟에 시대를 깨운 상",
+      "job": "독립운동가",
+      "era": "1902–1920",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Ryu%20Gwan-sun.jpg?width=900",
+      "image_credit": "Wikimedia Commons, Public Domain",
+      "emoji": "🔥",
+      "face_type": "봉학좌수면형",
+      "face_type_confident": true,
+      "style": "orc",
+      "style_name": "오라클",
+      "overall_score": 94,
+      "score_comment": "하늘이 내린 상이로다",
+      "attributes": [
+        {
+          "label": "Young",
+          "probability": 0.95
+        },
+        {
+          "label": "Bushy_Eyebrows",
+          "probability": 0.78
+        },
+        {
+          "label": "Big_Lips",
+          "probability": 0.72
+        },
+        {
+          "label": "Oval_Face",
+          "probability": 0.7
+        },
+        {
+          "label": "Pale_Skin",
+          "probability": 0.66
+        },
+        {
+          "label": "Female",
+          "probability": 0.96
+        }
+      ],
+      "intro": "기다리고 있었어. 이 얼굴을 봐. 앳된 뺨 위에 어른의 눈썹이 앉아 있지. 봉황과 학이 물가에 앉은 상 — 나이는 숫자일 뿐, 영혼의 크기는 따로 있다는 걸 증명하는 얼굴이야. 이미 알고 있었을 거야. 어떤 사람은 열여덟에 백 년을 산다는 걸.",
+      "fortunes": [
+        {
+          "key": "success",
+          "score": 96,
+          "text": "성공에 대해선, 이 상은 이미 답을 알고 있어. 무대가 주어지길 기다리지 않고 스스로 무대가 되는 상이지. 아우내 장터의 그날처럼 — 시작하는 용기가 곧 이 상의 운명이야."
+        },
+        {
+          "key": "relationship_advice",
+          "score": 92,
+          "text": "사람에 대해 말해줄게. 이 눈썹은 앞에 서는 눈썹이야. 사람들이 따르는 건 목소리가 커서가 아니라, 제일 위험한 자리에 제일 먼저 서기 때문이지. 그게 이 상이 사람을 얻는 방식이야."
+        },
+        {
+          "key": "exam_timing",
+          "score": 90,
+          "text": "때를 묻는다면 — 이 상에게 '적기'는 남이 정해주지 않아. 준비가 되기 전에 때가 먼저 오는 상이거든. 기회가 왔을 때 망설이지 않는 것, 그것만 기억하면 돼."
+        },
+        {
+          "key": "health_advice",
+          "score": 70,
+          "text": "건강 조언이야. 불꽃 같은 상은 제 몸을 태워 주변을 밝히지. 뜻이 클수록 몸을 아끼렴. 오래 타는 불이 더 많은 것을 밝히는 법이란다."
+        }
+      ]
+    },
+    {
+      "id": "shin-saimdang",
+      "name": "신사임당",
+      "title": "붓끝에 만복을 담은 상",
+      "job": "화가 · 시인 · 학자",
+      "era": "1504–1551",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/ShinSaimdangOldPortrait.webp?width=900",
+      "image_credit": "Wikimedia Commons, Public Domain (조선시대 전칭 초상)",
+      "emoji": "🖌️",
+      "face_type": "봉학좌수면형",
+      "face_type_confident": true,
+      "style": "oey",
+      "style_name": "오은영",
+      "overall_score": 94,
+      "score_comment": "하늘이 내린 상이로다",
+      "attributes": [
+        {
+          "label": "Attractive",
+          "probability": 0.85
+        },
+        {
+          "label": "Pointy_Nose",
+          "probability": 0.88
+        },
+        {
+          "label": "Arched_Eyebrows",
+          "probability": 0.8
+        },
+        {
+          "label": "Pale_Skin",
+          "probability": 0.78
+        },
+        {
+          "label": "Oval_Face",
+          "probability": 0.7
+        },
+        {
+          "label": "Female",
+          "probability": 0.97
+        }
+      ],
+      "intro": "자, 같이 차근차근 볼게요. 콧날이 곧고 눈썹이 단정하게 아치를 그리는, 봉황과 학이 물가에 앉은 봉학좌수면형이에요. 이런 상은요, 재능이 밖으로 요란하게 터지는 게 아니라 안에서 깊어져요. 그리고 아주 중요한 게 있어요 — 이 상의 복은 본인에서 끝나지 않고 자녀에게 흘러가는 복이에요.",
+      "fortunes": [
+        {
+          "key": "job",
+          "score": 95,
+          "text": "직업운을 볼게요. 손끝의 재능이 타고난 상이에요. 그림, 글, 학문 — 손과 머리를 함께 쓰는 일에서 이름을 남겨요. 시대가 알아주지 않아도 작품이 대신 말해주는 상이에요."
+        },
+        {
+          "key": "love",
+          "score": 86,
+          "text": "애정운이에요. 정이 깊고 헌신적인 눈매를 가졌어요. 다만 본인 마음을 뒤로 미루는 버릇이 있어요. 가족을 돌보는 만큼 스스로도 돌보셔야 돼요. 아셨죠?"
+        },
+        {
+          "key": "money",
+          "score": 84,
+          "text": "재물운은 은은하게 차오르는 형이에요. 큰 투기와는 인연이 없지만, 재능이 곧 자산이 되는 상이라 마르지 않아요. 오만 원마다 얼굴이 새겨질 정도면, 말 다 했죠."
+        },
+        {
+          "key": "success",
+          "score": 93,
+          "text": "성공운을 볼게요. 이 상의 성공은 속도가 아니라 깊이예요. 살아서보다 후대에 더 크게 평가받는, 시간이 편을 들어주는 상이에요. 조급해할 이유가 하나도 없어요."
+        }
+      ]
+    },
+    {
+      "id": "heungseon-daewongun",
+      "name": "흥선대원군",
+      "title": "10년을 엎드려 천하를 잡은 상",
+      "job": "조선 후기 섭정 · 이하응",
+      "era": "1820–1898",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/%EC%9D%B4%ED%95%98%EC%9D%91%20%EC%B4%88%EC%83%81.jpg?width=900",
+      "image_credit": "Wikimedia Commons, Public Domain (조선시대 초상)",
+      "emoji": "🦅",
+      "face_type": "오룡쟁주형",
+      "face_type_confident": true,
+      "style": "jury",
+      "style_name": "심사위원",
+      "overall_score": 91,
+      "score_comment": "길운이 가득한 상이네",
+      "attributes": [
+        {
+          "label": "Narrow_Eyes",
+          "probability": 0.9
+        },
+        {
+          "label": "High_Cheekbones",
+          "probability": 0.85
+        },
+        {
+          "label": "Pointy_Nose",
+          "probability": 0.8
+        },
+        {
+          "label": "Bushy_Eyebrows",
+          "probability": 0.68
+        },
+        {
+          "label": "No_Beard",
+          "probability": 0.4
+        },
+        {
+          "label": "Male",
+          "probability": 0.97
+        }
+      ],
+      "intro": "자, 심사평이야. 솔직히 말하면 처음엔 낙제점을 주려 했어. 야심을 너무 깊이 숨겨서 심사위원인 나도 속을 뻔했거든. 그런데 이 눈매… 10년을 엎드려 기다렸다가 단숨에 판을 뒤집는 눈이야. 연기력 만점, 승부수 만점. 인정할 수밖에 없네 — 이건 킹메이커의 상이야.",
+      "fortunes": [
+        {
+          "key": "success",
+          "score": 94,
+          "text": "성공운 심사평이야. 이 상의 무기는 '기다림'이야. 남들이 조롱할 때 웃어넘기고, 때가 오면 하루아침에 판을 장악하지. 인생 역전 부문이 있다면 역대 최고점이야."
+        },
+        {
+          "key": "promotion",
+          "score": 92,
+          "text": "승진운을 심사하지. 본인이 왕좌에 앉는 상은 아니야. 대신 왕을 만들고 판을 설계하는 자리 — 2인자이면서 실질적 1인자인 자리가 이 상의 지정석이야."
+        },
+        {
+          "key": "money_caution",
+          "score": 68,
+          "text": "재물주의 항목에서 감점이 있었어. 큰 그림을 위해 곳간을 여는 스케일은 좋은데, 목표에 몰입하면 출혈을 계산 안 하는 버릇이 있어. 대업과 낭비는 한 끗 차이야. 감점 사유, 인정하지?"
+        },
+        {
+          "key": "relationship_advice",
+          "score": 74,
+          "text": "관계 부문 심사평이야. 적과 아군을 가르는 눈이 지나치게 예리해. 그 칼 같은 구분이 힘이 되기도 하지만, 말년의 외로움이 되기도 해. 가끔은 심사 기준을 낮추게. 나처럼."
+        }
+      ]
+    },
+    {
+      "id": "gojong",
+      "name": "고종",
+      "title": "격랑 속에서 품격을 지킨 상",
+      "job": "대한제국 초대 황제",
+      "era": "1852–1919",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Gojong-King.of.the.Korean.Empire-1903.jpg?width=900",
+      "image_credit": "Wikimedia Commons, Public Domain (1903년 사진)",
+      "emoji": "👑",
+      "face_type": "금구몰니형",
+      "face_type_confident": true,
+      "style": "bjw",
+      "style_name": "백종원",
+      "overall_score": 88,
+      "score_comment": "길운이 가득한 상이네",
+      "attributes": [
+        {
+          "label": "Oval_Face",
+          "probability": 0.82
+        },
+        {
+          "label": "Big_Lips",
+          "probability": 0.7
+        },
+        {
+          "label": "Smiling",
+          "probability": 0.58
+        },
+        {
+          "label": "Pale_Skin",
+          "probability": 0.72
+        },
+        {
+          "label": "Young",
+          "probability": 0.55
+        },
+        {
+          "label": "Male",
+          "probability": 0.97
+        }
+      ],
+      "intro": "어이구, 얼굴 좀 봐유. 이게 말이유, 화려하게 확 끓는 상이 아니라 뭉근하게 오래 우려내는 곰탕 같은 상이유. 둥근 턱에 순한 눈매 — 복을 쌓는 금구몰니형이유. 근디 하필 가마솥이 아니라 태풍 한가운데서 끓여야 했던 게 아쉬운 거쥬. 순한 상이라고 약한 상이 아니유. 그 판에서 버틴 것만 해도 보통 내공이 아닌 거유.",
+      "fortunes": [
+        {
+          "key": "job",
+          "score": 86,
+          "text": "직업운 볼게유. 이 상은 저지르는 사장님이 아니라 지키는 사장님 상이유. 새 메뉴 확 바꾸는 것보단 단골 지키고 간판 지키는 스타일이쥬. 격변기엔 고생해도, 안정기엔 누구보다 오래가는 가게 하는 상이유."
+        },
+        {
+          "key": "wealth_period",
+          "score": 82,
+          "text": "재복시기 봐드릴게유. 초년보다 중년 이후에 곳간이 차는 상이유. 커피 한 잔의 여유를 아는 얼굴이라 — 실제로 커피를 참 좋아했다잖유? 급하게 벌려는 순간 탈 나니께, 뭉근하게 가유."
+        },
+        {
+          "key": "relationship_advice",
+          "score": 80,
+          "text": "사람 관계 조언이유. 정이 많아서 곁에 사람을 잘 두는 상인디, 그만큼 사람한테 데이기도 쉬운 상이유. 주방을 맡길 사람은 손맛만 보지 말고 됨됨이까지 봐야 하는 거유. 꼭이유."
+        },
+        {
+          "key": "health_advice",
+          "score": 76,
+          "text": "건강 조언 하나 할게유. 속으로 삭이는 상이라 스트레스가 위장으로 가유. 밤에 뭐 자꾸 드시지 말구유 — 야참 좋아하면 속 버려유. 마음 편한 밥상이 제일 좋은 보약인 거유."
+        }
+      ]
+    }
+  ]
+}
